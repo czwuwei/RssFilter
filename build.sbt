@@ -11,4 +11,5 @@ lazy val root = (project in file(".")).
     libraryDependencies ++= Seq(scalaTest % Test,
       "com.typesafe.akka" %% "akka-http" % "10.0.1",
       "com.typesafe.akka" %% "akka-http-xml" % "10.0.1")
-  )
+  ).
+  enablePlugins(JavaAppPackaging)
