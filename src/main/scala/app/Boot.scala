@@ -21,10 +21,10 @@ object Boot extends App {
 
   val bindingFuture = Http().bindAndHandle(server.routes, "0.0.0.0", port)
 
-  println(s"Server online at http://localhost:${port}/\nPress RETURN to stop...")
-  StdIn.readLine() // let it run until user presses return
-  bindingFuture
-    .flatMap(_.unbind()) // trigger unbinding from the port
-    .onComplete(_ => system.terminate()) // and shutdown when done
+  println(s"Server online at http://localhost:${port}")
+  // StdIn.readLine() // let it run until user presses return
+  // bindingFuture
+  //   .flatMap(_.unbind()) // trigger unbinding from the port
+  //   .onComplete(_ => system.terminate()) // and shutdown when done
 
 }
