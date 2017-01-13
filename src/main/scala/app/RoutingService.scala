@@ -36,6 +36,11 @@ trait RoutingService {
   val logger = Logging(system, this)
 
   val routes: Route = {
+    pathSingleSlash {
+      get {
+        complete("<h1>RSS Filter</h1>")
+      }
+    } ~
     path("filter") {
       get {
         parameters('feed) { feed =>
