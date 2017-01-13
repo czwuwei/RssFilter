@@ -19,8 +19,7 @@ object Boot extends App {
   val config = ConfigFactory.load
   val port: Int = config.getInt("http.port")
 
-  val bindingFuture = Http().bindAndHandle(server.routes, "ww-rssfilter-akka.herokuapp.com", port)
-  // val bindingFuture = Http().bindAndHandle(server.routes, "0.0.0.0", port)
+  val bindingFuture = Http().bindAndHandle(server.routes, "0.0.0.0", port)
 
   println(s"Server online at http://localhost:${port}/\nPress RETURN to stop...")
   StdIn.readLine() // let it run until user presses return
