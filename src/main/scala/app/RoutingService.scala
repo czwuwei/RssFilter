@@ -35,6 +35,12 @@ trait RoutingService {
   val name = "Routing Service"
   val logger = Logging(system, this)
 
+  def filtering(text:String):Boolean = {
+    keywords.foldLeft(false) { case (filtered, keyword) =>
+        filtered || (text.contains(keyword))
+    }
+  }
+
   val routes: Route = {
     pathSingleSlash {
       get {
@@ -99,7 +105,7 @@ trait RoutingService {
             val fRemove = new RewriteRule {
               override def transform(n: Node): Seq[Node] = n match {
                 case item: Elem if item.label == "item" => item match {
-                  case want: Elem if item.text.contains("NFC") => want
+                  case want: Elem if filtering(item.text) => want
                   case unwant => NodeSeq.Empty
                 }
                 case other => other
