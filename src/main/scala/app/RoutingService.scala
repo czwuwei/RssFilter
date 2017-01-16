@@ -24,8 +24,6 @@ trait RoutingService {
   implicit val materializer = ActorMaterializer()
   implicit val executionContext = system.dispatcher
 
-  val keywords: Seq[String] = Seq("Android Pay", "Apple Pay", "NFC")
-
   implicit val myLogSourceType: LogSource[RoutingService] = new LogSource[RoutingService] {
     override def genString(a: RoutingService) = a.name
 
@@ -35,7 +33,7 @@ trait RoutingService {
   val name = "Routing Service"
   val logger = Logging(system, this)
 
-  def filtering(text:String):Boolean = {
+  def filtering(text:String, keywords:Seq[String]):Boolean = {
     keywords.foldLeft(false) { case (filtered, keyword) =>
         filtered || (text.contains(keyword))
     }
@@ -49,9 +47,12 @@ trait RoutingService {
     } ~
     path("filter") {
       get {
-        parameters('feed) { feed =>
+        parameters('feed, 'keywords) { (feed, keywords) =>
 
-          logger.debug(s"input origin feed: $feed")
+          val keywordList: Seq[String] = keywords.split(",").toSeq
+
+          logger.debug(s"input origin feed: $feed & keywords:[${keywordList.mkString}]")
+
 
           //          val connectionFlow = Http().outgoingConnection("japanese.engadget.com")
           //          val futureFilteredRss: Future[String] = Source.single(HttpRequest.apply(uri = "/rss.xml"))
@@ -105,7 +106,7 @@ trait RoutingService {
             val fRemove = new RewriteRule {
               override def transform(n: Node): Seq[Node] = n match {
                 case item: Elem if item.label == "item" => item match {
-                  case want: Elem if filtering(item.text) => want
+                  case want: Elem if filtering(item.text, keywordList) => want
                   case unwant => NodeSeq.Empty
                 }
                 case other => other
