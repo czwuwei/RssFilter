@@ -4,7 +4,7 @@ import akka.actor.ActorSystem
 import akka.event.{LogSource, Logging}
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.marshallers.xml.ScalaXmlSupport._
-import akka.http.scaladsl.model.{ContentTypes, HttpEntity, HttpRequest}
+import akka.http.scaladsl.model.{ContentTypes, HttpEntity, HttpRequest, StatusCodes}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.unmarshalling._
@@ -34,6 +34,7 @@ trait RoutingService {
   val logger = Logging(system, this)
 
   def filtering(text:String, keywords:Seq[String]):Boolean = {
+    logger.debug(s"filter $keywords in \n  $text")
     keywords.foldLeft(false) { case (filtered, keyword) =>
         filtered || (text.contains(keyword))
     }
@@ -51,7 +52,7 @@ trait RoutingService {
 
           val keywordList: Seq[String] = keywords.split(",").toSeq
 
-          logger.debug(s"input origin feed: $feed & keywords:[${keywordList.mkString}]")
+          logger.debug(s"input origin feed: $feed & keywords:[${keywordList.mkString(",")}]")
 
 
           //          val connectionFlow = Http().outgoingConnection("japanese.engadget.com")
@@ -103,6 +104,10 @@ trait RoutingService {
             _ <- Future.successful(logger.debug(s" response status [${response.status}]"))
             node <- Unmarshal(response.entity).to[NodeSeq]
           } yield {
+            if (response.status != StatusCodes.OK) {
+              logger.debug("not OK response: " + node.toString())
+            }
+
             val fRemove = new RewriteRule {
               override def transform(n: Node): Seq[Node] = n match {
                 case item: Elem if item.label == "item" => item match {
